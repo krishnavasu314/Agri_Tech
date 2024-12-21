@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: django-app
+    env: python
+    buildCommand: |
+      apt-get update && apt-get install -y tesseract-ocr  # Install Tesseract
+      pip install -r requirements.txt                    # Install Python dependencies
+    startCommand: gunicorn agritech.wsgi:application     # Start Django with Gunicorn
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: agritech.settings
+      - key: PYTHONUNBUFFERED
+        value: "1"

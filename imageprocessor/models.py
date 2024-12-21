@@ -5,7 +5,7 @@ class UploadedImage(models.Model):
 
     # image = models.ImageField(upload_to='uploaded_images/')
     image = CloudinaryField('image')
-    farmer_id = models.CharField(max_length=255, null=False, blank=True, default="Unknown")
+    farmer_id = models.CharField(max_length=255, null=False, blank=False )
     extracted_text = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     latitude = models.FloatField(blank=False, null=True)

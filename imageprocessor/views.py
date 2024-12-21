@@ -12,7 +12,7 @@ import requests
 from cloudinary.uploader import destroy
 
 
-
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 
 def extract_farmer_id(text):
