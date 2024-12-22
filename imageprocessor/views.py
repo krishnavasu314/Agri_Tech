@@ -10,12 +10,12 @@ from PIL import Image, ImageEnhance, ImageFilter
 from django.core.files.storage import default_storage
 import requests
 from cloudinary.uploader import destroy
-import os
+# import os
 
-if os.name == "nt":  # Windows
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-else:  # Linux (Docker)
-    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+# if os.name == "nt":  # Windows
+#     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# else:  # Linux (Docker)
+#     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 
 
