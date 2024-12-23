@@ -13,6 +13,19 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import dj_database_url
 from decouple import config
+# import os
+# from dotenv import load_dotenv
+
+# # Load environment variables from .env file
+# load_dotenv()
+
+import os
+
+# Assuming the key is inside 'credentials/' directory
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials/text-extraction-project-445618-a8afc95dcd50.json"
+
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -158,6 +171,9 @@ STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
 
 
 

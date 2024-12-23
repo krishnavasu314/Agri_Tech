@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: django-app
+    env: python
+    buildCommand: |
+      apt-get update && \
+      apt-get install -y \
+        libtiff-dev \
+        libjpeg-dev \
+        libpng-dev \
+        libgoogle-glog-dev \
+        libgflags-dev \
+        libleveldb-dev \
+        libsnappy-dev \
+        libopencv-dev && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* && \
+      pip install -r requirements.txt
+    startCommand: |
+      python manage.py migrate && \
+      gunicorn agritech.wsgi:application --bind 0.0.0.0:8000 --workers 3 --threads 2
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        value: django-insecure-l(5*@sh@4v-nxm+-1aar2$fz@+=@&qt-6#v9%+lsuf@vq^@i$$
+      - key: CLOUDINARY_URL
+        value: cloudinary://382135212123535:-X00zF2wOQ2fiepyQp53YKFPkRo@dvdma4fvb
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: credentials/text-extraction-project-445618-a8afc95dcd50.json  

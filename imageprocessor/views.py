@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect,get_object_or_404
 from .forms import ImageUploadForm
 from .models import UploadedImage
 from django.conf import settings
-import pytesseract
 import re 
 from django.db.models import Max
 from django.http import JsonResponse
@@ -10,13 +9,38 @@ from PIL import Image, ImageEnhance, ImageFilter
 from django.core.files.storage import default_storage
 import requests
 from cloudinary.uploader import destroy
+from google.cloud import vision
 # import os
 
-# if os.name == "nt":  # Windows
-#     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-# else:  # Linux (Docker)
-#     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+# # Ensure this line runs before calling Google Vision API
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
+
+
+
+
+
+
+def extract_text_with_google_vision(image_url):
+    """Extract text using Google Vision API."""
+    client = vision.ImageAnnotatorClient()
+
+    # Load the image from the URL
+    response = requests.get(image_url)
+    if response.status_code != 200:
+        raise Exception("Failed to download the image.")
+
+    content = response.content
+
+    # Create a Vision API Image object
+    image = vision.Image(content=content)
+
+    # Use Vision API to detect text
+    response = client.text_detection(image=image)
+    annotations = response.text_annotations
+    if annotations:
+        return annotations[0].description.strip()  # Return extracted text
+    return ""
 
 
 
@@ -55,7 +79,7 @@ def extract_coordinates(text):
     if latitude_match:
         latitude_value = float(latitude_match.group(1))
         
-        # If latitude has an integer form, e.g., 18370791.0, convert it to a decimal
+       
         if latitude_value.is_integer():
             latitude = latitude_value / 1000000  # Convert to decimal format
         else:
@@ -67,7 +91,7 @@ def extract_coordinates(text):
 
     return latitude, longitude
 
-
+#original
 
 def upload_image(request):
     if request.method == 'POST':
@@ -80,10 +104,15 @@ def upload_image(request):
                 image_url = uploaded_image.image.url  # Cloudinary URL
                 image = Image.open(requests.get(image_url, stream=True).raw)
 
-                # OCR Processing using pytesseract
-                extracted_text = pytesseract.image_to_string(image)
-                uploaded_image.extracted_text = extracted_text.strip()
+                # # OCR Processing using pytesseract
+                # extracted_text = pytesseract.image_to_string(image)
+                # uploaded_image.extracted_text = extracted_text.strip()
 
+
+                # Use Google Vision API to extract text
+                image_url = uploaded_image.image.url 
+
+                extracted_text = extract_text_with_google_vision(image_url)
                 # Check if text was extracted
                 if not extracted_text.strip():
                     destroy(uploaded_image.image.public_id)  # Delete image from Cloudinary
@@ -114,6 +143,8 @@ def upload_image(request):
 
                 # Save Farmer ID and coordinates
                 uploaded_image.farmer_id = farmer_id
+                uploaded_image.extracted_text = extracted_text
+
                 latitude, longitude = extract_coordinates(extracted_text)
                 uploaded_image.latitude = latitude
                 uploaded_image.longitude = longitude
@@ -134,8 +165,6 @@ def upload_image(request):
         form = ImageUploadForm()
 
     return render(request, 'imageprocessor/upload_image.html', {'form': form})
-
-
 
 
 
@@ -166,7 +195,7 @@ def delete_image(request, image_id):
         
         # Delete the associated file from storage
         if image_record.image:
-            # image_record.image.delete(save=False)  # This deletes the file from the media folder
+            
             destroy(image_record.image.public_id)
         # Delete the record from the database
         image_record.delete()
